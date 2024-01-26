@@ -3,7 +3,9 @@ package tech.csm.controller;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,8 +40,24 @@ public class AppController {
 	public String getForm(Model model) {
 
 		model.addAttribute("subs", subscriptionService.getAllSubs());
-		model.addAttribute("memberships", membershipService.getAllMemberships());
-	
+
+		List<Membership> memberships = membershipService.getAllMemberships();
+
+		for (Membership membership : memberships) {
+			int subscriptionDuration = membership.getDuration();
+
+			Calendar expirationCalendar = Calendar.getInstance();
+			expirationCalendar.setTime(new Date());
+			expirationCalendar.add(Calendar.MONTH, subscriptionDuration);
+			Date expirationDate = expirationCalendar.getTime();
+
+			// Store the calculated expiration date in the membership object
+			membership.setExpiredOn(expirationDate);
+			membership.setValidFrom(new Date());
+		}
+
+		model.addAttribute("memberships", memberships);
+
 		return "regform";
 	}
 
@@ -81,5 +99,41 @@ public class AppController {
 
 		return "redirect:/getform";
 
+	}
+
+	@GetMapping("/upgradePlan")
+	public String upgragePlan(@RequestParam("membershipId") String membershipId, @ModelAttribute Membership mb, RedirectAttributes redirectAttributes,
+			Model model) {
+		
+		Membership membership = membershipService.getMemberById(membershipId);
+
+		List<Membership> memberships = membershipService.getAllMemberships();
+
+		for (Membership m : memberships) {
+			int subscriptionDuration = membership.getDuration();
+
+			Calendar expirationCalendar = Calendar.getInstance();
+			expirationCalendar.setTime(new Date());
+			expirationCalendar.add(Calendar.MONTH, subscriptionDuration);
+			Date expirationDate = expirationCalendar.getTime();
+
+			// Store the calculated expiration date in the membership object
+			m.setExpiredOn(expirationDate);
+			m.setValidFrom(new Date());
+		}
+		
+		Double total =  membership.getSubscription().getSubscriptionCost() * membership.getDuration();
+		membership.setTotalCost(total);
+		
+
+		model.addAttribute("subs", subscriptionService.getAllSubs());
+		model.addAttribute("memberships", memberships);
+		model.addAttribute("membership", membership);
+
+		String msg = membershipService.upgradePlan(membership);
+
+		redirectAttributes.addFlashAttribute("msg", msg);
+
+		return "regform";
 	}
 }

@@ -45,6 +45,14 @@ public class Membership implements Serializable  {
 	
 	private Integer duration;
 	
+	@Transient
+	private Date validFrom;
+	
+	@Transient
+	private Date expiredOn;
+	
+	@Transient
+	private Double totalCost;
 	
 	@ManyToOne
 	@JoinColumn(name="subscription_id")

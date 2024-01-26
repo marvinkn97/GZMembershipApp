@@ -11,5 +11,9 @@ public interface MembershipService {
 	String registerMember(Membership membership);
 	
 	String deleteMember(String membershipId);
+	
+	Membership getMemberById(String membershipId);
+	
+	String upgradePlan(Membership membership);
 
 }

@@ -39,4 +39,16 @@ public class MembershipServiceImpl implements MembershipService {
 
 	}
 
+	@Override
+	public Membership getMemberById(String membershipId) {
+		return membershipRepo.findByMemberId(membershipId);
+
+	}
+
+	@Override
+	public String upgradePlan(Membership membership) {
+		membershipRepo.save(membership);
+		return "Membership plan updated";
+	}
+
 }

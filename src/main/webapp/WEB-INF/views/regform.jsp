@@ -4,18 +4,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ page import="java.util.Date, java.util.Calendar"%>
+<%@ page import="tech.csm.model.Subscription" %>
 
-
-<%
-// Step 1: Retrieve the current date
-Date currentDate = new Date();
-
-// Step 2: Add duration in months
-Calendar calendar = Calendar.getInstance();
-calendar.setTime(currentDate);
-//calendar.add(Calendar.MONTH, m.duration); // Add 3 months, adjust as needed
-Date futureDate = calendar.getTime();
-%>
 
 
 <!DOCTYPE html>
@@ -53,23 +43,24 @@ Date futureDate = calendar.getTime();
 
 					<form action="./registerMember" method="post">
 						<div class="row">
+						<input type="hidden" value="${membership.memberId}" name="memberId">
 
 							<div class="form-group col-md-4">
 								<label for="nameId">Name</label> <input type="text"
 									class="form-control" id="nameId" name="name"
-									placeholder="Enter Name">
+									placeholder="Enter Name" value="${membership.name}">
 							</div>
 
 							<div class="form-group col-md-4">
 								<label for="emailId">Email</label> <input type="text"
 									class="form-control" id="emailId" name="email"
-									placeholder="Enter email">
+									placeholder="Enter email" value="${membership.email}">
 							</div>
 
 							<div class="form-group col-md-4">
 								<label for="phoneId">Phone</label> <input type="text"
 									class="form-control" id="phoneId" name="phoneNo"
-									placeholder="Enter Mobile Number">
+									placeholder="Enter Mobile Number" value="${membership.phoneNo}">
 							</div>
 
 						</div>
@@ -78,7 +69,8 @@ Date futureDate = calendar.getTime();
 							<div class="form-group col-md-3">
 								<label for="dobId">Date of Birth</label> <input type="date"
 									class="form-control" id="dobId" name="dob"
-									placeholder="Enter Date of Birth</">
+									placeholder="Enter Date of Birth" 
+									value=<fmt:formatDate value="${membership.dob}" pattern="yyyy-MM-dd"  />>
 							</div>
 
 							<div class="form-group col-md-3">
@@ -86,7 +78,10 @@ Date futureDate = calendar.getTime();
 									class="form-control" name="subscription" id="sbId">
 									<option value="0">--select--</option>
 									<c:forEach items="${subs}" var="sub">
-										<option value="${sub.subscriptionId}">${sub.subscriptionName}</option>
+										<option value="${sub.subscriptionId}" 
+										 <c:if test="${membership.subscription.subscriptionId eq sub.subscriptionId}">selected='selected'</c:if>
+										>
+										${sub.subscriptionName}</option>
 									</c:forEach>
 								</select>
 							</div>
@@ -94,18 +89,19 @@ Date futureDate = calendar.getTime();
 							<div class="form-group col-md-3">
 								<label for="durationId">Duration in months</label> <input
 									type="number" class="form-control" id="durationId"
-									name="duration" min="0" onchange="calcTotalCost()">
+									name="duration" min="0" onchange="calcTotalCost()" value="${membership.duration}">
 							</div>
 
 							<div class="form-group col-md-3">
 								<label for="totalId">Total Cost</label> <input type="text"
-									class="form-control" id="totalId" readonly="readonly">
+									class="form-control" id="totalId" readonly="readonly" value="${membership.totalCost}">
 							</div>
 
 
 						</div>
 						<div class="mt-2 text-center">
-							<input type="submit" class="btn btn-success" value="Save">
+							<input type="submit" class="btn btn-success"
+							 value="${membership eq null ? 'Save' : 'Update'}">
 							<input type="reset" class="btn btn-warning" value="Clear">
 						</div>
 					</form>
@@ -135,14 +131,15 @@ Date futureDate = calendar.getTime();
 								<td><fmt:formatDate value="${m.dob}" pattern="yyyy-MM-dd" /></td>
 								<td>${m.phoneNo}</td>
 								<td>${m.subscription.subscriptionName}</td>
-								<td><fmt:formatDate value="<%=new Date()%>"
+								<td><fmt:formatDate value="${m.validFrom}"
 										pattern="yyyy-MM-dd" /></td>
-								<td></td>
+								<td><fmt:formatDate value="${m.expiredOn}"
+										pattern="yyyy-MM-dd" /></td>
 								<td>
 									<div class="text-center">
 										<a href="./deleteMember?membershipId=${m.memberId}"
 											class="btn btn-sm btn-danger text-white">Delete</a> <a
-											href="./upgradePlan"
+											href="./upgradePlan?membershipId=${m.memberId}"
 											class="btn btn-sm btn-warning text-white">Upgrade Plan</a>
 									</div>
 								</td>
